@@ -50,7 +50,7 @@ variable "mode" {
 }
 
 variable "tags" {
-  type        = list(strings)
+  type        = list(string)
   description = "List of tags for the resource"
   default     = []
 }
