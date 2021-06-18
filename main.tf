@@ -14,6 +14,6 @@ resource ibm_is_vpn_gateway gateway {
   name           = "${local.name}${format("%02s", count.index + 1)}"
   resource_group = var.resource_group_id
   subnet         = local.subnet_ids[count.index]
-  tags           = (var.tags != null ? var.tags : [])
+  tags           = concat((var.tags != null ? var.tags : []), [count.index == 0 ? "gateway" : (ibm_is_vpn_gateway.gateway[count.index - 1].id != "" ? "gateway" : "gateway")])
   mode           = var.mode
 }
