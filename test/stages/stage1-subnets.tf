@@ -6,6 +6,6 @@ module "subnets" {
   ibmcloud_api_key  = var.ibmcloud_api_key
   vpc_name          = module.vpc.name
   gateways          = []
-  _count            = 2
+  _count            = 1
   label             = "vpn"
 }
