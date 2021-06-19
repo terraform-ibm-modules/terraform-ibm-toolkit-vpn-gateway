@@ -6,16 +6,34 @@
 locals {
   name = replace("${var.vpc_name}-${var.label}", "/[^a-zA-Z0-9_\\-\\.]/", "")
   subnet_ids  = var.vpc_subnets[*].id
+  output_file = "${path.cwd}/.tmp/vpn-gateways.json"
+  output = jsondecode(data.local_file.gateway_output.content)
 }
 
 resource null_resource create_gateway {
+  count = var.provision ? 1 : 0
+
   provisioner "local-exec" {
-    command = "${path.module}/scripts/create-gateway.sh '${var.region}' '${local.name}' '${join(",", local.subnet_ids)}'"
+    command = "${path.module}/scripts/create-gateway.sh '${var.region}' '${local.name}' '${join(",", local.subnet_ids)}' '${local.output_file}'"
 
     environment = {
       IBMCLOUD_API_KEY = var.ibmcloud_api_key
     }
   }
+}
+
+resource null_resource create_empty_output {
+  count = !var.provision ? 1 : 0
+
+  provisioner "local-exec" {
+    command = "mkdir -p '$(dirname ${local.output_file})' && echo '[]' > ${local.output_file}"
+  }
+}
+
+data local_file gateway_output {
+  depends_on = [null_resource.create_gateway, null_resource.create_empty_output]
+
+  filename = local.output_file
 }
 
 //resource ibm_is_vpn_gateway gateway {

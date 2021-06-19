@@ -3,6 +3,7 @@
 REGION="$1"
 BASE_NAME="$2"
 SUBNET_IDS="$3"
+OUTPUT_FILE="$4"
 
 JQ=$(command -v jq | command -v ./bin/jq)
 
@@ -20,13 +21,25 @@ IAM_TOKEN=$(curl -X POST "https://iam.cloud.ibm.com/identity/token" \
 API_ENDPOINT="https://${REGION}.iaas.cloud.ibm.com/v1"
 API_VERSION="2021-06-18"
 
+COMBINED_RESULT="[]"
+
 IFS=','
 subnet_ids=$SUBNET_IDS
 count=1
 for id in subnet_ids; do
-  curl -H "Authorization: ${IAM_TOKEN}" \
+  RESULT=$(curl -H "Authorization: ${IAM_TOKEN}" \
     -X POST "${API_ENDPOINT}/vpn_gateways?version=${API_VERSION}&generation=2" \
-    -d "{\"name\":\"${BASE_NAME}-${count}\",\"subnet\":{\"id\": \"$id\"}}"
+    -d "{\"name\":\"${BASE_NAME}-${count}\",\"subnet\":{\"id\": \"$id\"}}")
+
+  PRUNED_RESULT=$(echo "${RESULT}" | ${JQ} -c '{crn: .crn, id: .id}')
+
+  COMBINED_RESULT=$(echo "${COMBINED_RESULT}" | ${JQ} --argjson ENTRY "${PRUNED_RESULT}" '. += [$ENTRY]')
 
   count=$((count + 1))
 done
+
+if [[ -n "${OUTPUT_FILE}" ]]; then
+  mkdir -p "$(dirname "${OUTPUT_FILE}")"
+
+  echo "${COMBINED_RESULT}" > "${OUTPUT_FILE}"
+fi
