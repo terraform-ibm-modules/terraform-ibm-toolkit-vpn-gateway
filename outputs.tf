@@ -4,12 +4,12 @@
 #####################################################
 
 output "ids" {
-  value = var.provision ? output[*].id : []
+  value = var.provision ? local.output[*].id : []
   description = "The ids of the gateways that were created"
 }
 
 output "crns" {
-  value = var.provision ? output[*].crn : []
+  value = var.provision ? local.output[*].crn : []
   description = "The crns of the gateways that were created"
 }
 
