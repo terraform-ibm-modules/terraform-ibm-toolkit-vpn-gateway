@@ -24,7 +24,7 @@ VPN_GATEWAYS=$(curl -X GET "${API_ENDPOINT}/v1/vpn_gateways?version=${API_VERSIO
 
 IFS=','
 subnet_ids=$SUBNET_IDS
-for id in subnet_ids; do
+for id in $subnet_ids; do
   echo "${VPN_GATEWAYS}" | ${JQ} -r --arg ID "${id}" '.vpn_gateways[] | select(.subnet.id == $ID) | .id' | \
     while read vpn_gateway_id;
   do

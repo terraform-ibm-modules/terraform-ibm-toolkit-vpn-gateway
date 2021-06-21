@@ -39,7 +39,7 @@ echo "VPN Gateways: ${VPN_GATEWAYS}"
 
 IFS=','
 subnet_ids=$SUBNET_IDS
-for id in subnet_ids; do
+for id in $subnet_ids; do
   echo "${VPN_GATEWAYS}" | ${JQ} -c --arg ID "${id}" '.vpn_gateways[] | select(.subnet.id == $ID)' | \
     while read gateway;
   do

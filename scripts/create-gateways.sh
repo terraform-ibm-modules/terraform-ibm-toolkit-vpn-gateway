@@ -25,12 +25,10 @@ fi
 API_ENDPOINT="https://${REGION}.iaas.cloud.ibm.com/v1"
 API_VERSION="2021-06-18"
 
-COMBINED_RESULT="[]"
-
 IFS=','
 subnet_ids=$SUBNET_IDS
 count=1
-for id in subnet_ids; do
+for id in $subnet_ids; do
   name="${BASE_NAME}-${count}"
   echo "Provisioning $name VPN instance for subnet: $id"
 
