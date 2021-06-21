@@ -60,7 +60,7 @@ resource null_resource list_vpn_gateways {
 }
 
 data local_file gateway_output {
-  depends_on = [null_resource.create_gateway]
+  depends_on = [null_resource.list_vpn_gateways]
 
   filename = local.output_file
 }
