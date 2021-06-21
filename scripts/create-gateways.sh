@@ -10,7 +10,7 @@ JQ=$(command -v jq | command -v ./bin/jq)
 
 if [[ -z "${JQ}" ]]; then
   echo "jq missing. Installing"
-  mkdir -p bin && curl -Lo ./bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+  mkdir -p bin && curl -sLo ./bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
   chmod +x ./bin/jq
   JQ=$(command -v ./bin/jq)
 fi
@@ -34,6 +34,8 @@ for id in subnet_ids; do
   RESULT=$(curl -s -H "Authorization: ${IAM_TOKEN}" \
     -X POST "${API_ENDPOINT}/vpn_gateways?version=${API_VERSION}&generation=2" \
     -d "{\"name\":\"${name}\",\"mode\":\"policy\",\"subnet\":{\"id\": \"$id\"},\"resource_group\":{\"id\":\"${RESOURCE_GROUP}\"}}")
+
+  echo "Result: ${RESULT}"
 
   PRUNED_RESULT=$(echo "${RESULT}" | ${JQ} -c '{crn: .crn, id: .id}')
 
