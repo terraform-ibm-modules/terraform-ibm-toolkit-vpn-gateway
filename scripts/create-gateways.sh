@@ -32,7 +32,7 @@ for id in $subnet_ids; do
   name="${BASE_NAME}-${count}"
   echo "Provisioning $name VPN instance for subnet: $id"
 
-  RESULT=$(curl -s -H "Authorization: ${IAM_TOKEN}" -X POST "${API_ENDPOINT}/vpn_gateways?version=${API_VERSION}&generation=2" -d "{\"name\":\"${name}\",\"mode\":\"policy\",\"subnet\":{\"id\": \"$id\"},\"resource_group\":{\"id\":\"${RESOURCE_GROUP}\"}}")
+  RESULT=$(curl -s -H "Authorization: Bearer ${IAM_TOKEN}" -X POST "${API_ENDPOINT}/vpn_gateways?version=${API_VERSION}&generation=2" -d "{\"name\":\"${name}\",\"mode\":\"policy\",\"subnet\":{\"id\": \"$id\"},\"resource_group\":{\"id\":\"${RESOURCE_GROUP}\"}}")
 
   echo "Result: ${RESULT}"
 
