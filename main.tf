@@ -17,13 +17,14 @@ resource null_resource create_gateway {
     region = var.region
     resource_group = var.resource_group_id
     subnet_ids = join(",", local.subnet_ids)
+    ibmcloud_api_key = var.ibmcloud_api_key
   }
 
   provisioner "local-exec" {
-    command = "${path.module}/scripts/create-gateways.sh '${self.triggers.region}' '${self.triggers.resource_group}' '${local.name}' '${self.triggers.subnet_ids}' '${local.output_file}'"
+    command = "${path.module}/scripts/create-gateways.sh '${self.triggers.region}' '${self.triggers.resource_group}' '${local.name}' '${self.triggers.subnet_ids}'"
 
     environment = {
-      IBMCLOUD_API_KEY = var.ibmcloud_api_key
+      IBMCLOUD_API_KEY = self.triggers.ibmcloud_api_key
     }
   }
 
@@ -31,19 +32,35 @@ resource null_resource create_gateway {
     when = destroy
 
     command = "${path.module}/scripts/delete-gateways.sh '${self.triggers.region}' '${self.triggers.resource_group}' '${self.triggers.subnet_ids}'"
+
+    environment = {
+      IBMCLOUD_API_KEY = self.triggers.ibmcloud_api_key
+    }
   }
 }
 
-resource null_resource create_empty_output {
-  count = !var.provision ? 1 : 0
+resource null_resource list_vpn_gateways {
+  depends_on = [null_resource.create_gateway]
+
+  triggers = {
+    always_run = timestamp()
+    region = var.region
+    resource_group = var.resource_group_id
+    subnet_ids = join(",", local.subnet_ids)
+    ibmcloud_api_key = var.ibmcloud_api_key
+  }
 
   provisioner "local-exec" {
-    command = "mkdir -p '$(dirname ${local.output_file})' && echo '[]' > ${local.output_file}"
+    command = "${path.module}/scripts/list-gateways.sh '${self.triggers.region}' '${self.triggers.resource_group}' '${self.triggers.subnet_ids}' '${local.output_file}'"
+
+    environment = {
+      IBMCLOUD_API_KEY = self.triggers.ibmcloud_api_key
+    }
   }
 }
 
 data local_file gateway_output {
-  depends_on = [null_resource.create_gateway, null_resource.create_empty_output]
+  depends_on = [null_resource.create_gateway]
 
   filename = local.output_file
 }

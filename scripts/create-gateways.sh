@@ -4,7 +4,6 @@ REGION="$1"
 RESOURCE_GROUP="$2"
 BASE_NAME="$3"
 SUBNET_IDS="$4"
-OUTPUT_FILE="$5"
 
 JQ=$(command -v jq | command -v ./bin/jq)
 
@@ -37,15 +36,5 @@ for id in subnet_ids; do
 
   echo "Result: ${RESULT}"
 
-  PRUNED_RESULT=$(echo "${RESULT}" | ${JQ} -c '{crn: .crn, id: .id}')
-
-  COMBINED_RESULT=$(echo "${COMBINED_RESULT}" | ${JQ} --argjson ENTRY "${PRUNED_RESULT}" '. += [$ENTRY]')
-
   count=$((count + 1))
 done
-
-if [[ -n "${OUTPUT_FILE}" ]]; then
-  mkdir -p "$(dirname "${OUTPUT_FILE}")"
-
-  echo "${COMBINED_RESULT}" > "${OUTPUT_FILE}"
-fi
