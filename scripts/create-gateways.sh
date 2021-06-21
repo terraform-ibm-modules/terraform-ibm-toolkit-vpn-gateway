@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 REGION="$1"
-BASE_NAME="$2"
-SUBNET_IDS="$3"
-OUTPUT_FILE="$4"
+RESOURCE_GROUP="$2"
+BASE_NAME="$3"
+SUBNET_IDS="$4"
+OUTPUT_FILE="$5"
 
 JQ=$(command -v jq | command -v ./bin/jq)
 
@@ -14,7 +15,7 @@ if [[ -z "${JQ}" ]]; then
   JQ=$(command -v ./bin/jq)
 fi
 
-IAM_TOKEN=$(curl -X POST "https://iam.cloud.ibm.com/identity/token" \
+IAM_TOKEN=$(curl -s -X POST "https://iam.cloud.ibm.com/identity/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "grant_type=urn:ibm:params:oauth:grant-type:apikey&apikey=${IBMCLOUD_API_KEY}" | ${JQ} '.access_token')
 
@@ -27,9 +28,12 @@ IFS=','
 subnet_ids=$SUBNET_IDS
 count=1
 for id in subnet_ids; do
-  RESULT=$(curl -H "Authorization: ${IAM_TOKEN}" \
+  name="${BASE_NAME}-${count}"
+  echo "Provisioning $name VPN instance for subnet: $id"
+
+  RESULT=$(curl -s -H "Authorization: ${IAM_TOKEN}" \
     -X POST "${API_ENDPOINT}/vpn_gateways?version=${API_VERSION}&generation=2" \
-    -d "{\"name\":\"${BASE_NAME}-${count}\",\"subnet\":{\"id\": \"$id\"}}")
+    -d "{\"name\":\"${name}\",\"mode\":\"policy\",\"subnet\":{\"id\": \"$id\"},\"resource_group\":{\"id\":\"${RESOURCE_GROUP}\"}}")
 
   PRUNED_RESULT=$(echo "${RESULT}" | ${JQ} -c '{crn: .crn, id: .id}')
 
