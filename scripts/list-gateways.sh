@@ -43,7 +43,7 @@ for id in $subnet_ids; do
   echo "${VPN_GATEWAYS}" | ${JQ} -c --arg ID "${id}" '.vpn_gateways[] | select(.subnet.id == $ID)' | \
     while read gateway;
   do
-    jq --argjson ENTRY "${gateway}" '. += [$gateway]' < "${OUTPUT_FILE}" > "${OUTPUT_FILE}.tmp" && \
+    jq --argjson ENTRY "${gateway}" '. += [$ENTRY]' < "${OUTPUT_FILE}" > "${OUTPUT_FILE}.tmp" && \
       cp "${OUTPUT_FILE}.tmp" "${OUTPUT_FILE}" && \
       rm "${OUTPUT_FILE}.tmp"
   done

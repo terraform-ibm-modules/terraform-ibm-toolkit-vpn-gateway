@@ -10,7 +10,7 @@ locals {
   output = jsondecode(data.local_file.gateway_output.content)
 }
 
-resource null_resource create_gateway {
+resource null_resource vpn_gateways {
   count = var.provision ? 1 : 0
 
   triggers = {
@@ -40,7 +40,7 @@ resource null_resource create_gateway {
 }
 
 resource null_resource list_vpn_gateways {
-  depends_on = [null_resource.create_gateway]
+  depends_on = [null_resource.vpn_gateways]
 
   triggers = {
     always_run = timestamp()
