@@ -53,7 +53,13 @@ done
 
 GATEWAY_IDS_REGEX=$(cat "${GATEWAY_IDS_FILE}" | paste -sd "|" -)
 
-echo "Waiting for VPN Gateways to be created"
+echo "Waiting for VPN Gateways to be created: ${GATEWAY_IDS_REGEX}"
+
+echo "VPN Gateways"
+curl -s -X GET "${API_ENDPOINT}/v1/vpn_gateways/${vpn_gateway_id}?version=${API_VERSION}&generation=2" -H "Authorization: Bearer ${IAM_TOKEN}" | ${JQ} '.vpn_gateways[]'
+
+echo "Statuses"
+curl -s -X GET "${API_ENDPOINT}/v1/vpn_gateways/${vpn_gateway_id}?version=${API_VERSION}&generation=2" -H "Authorization: Bearer ${IAM_TOKEN}" | ${JQ} -r --arg re "${GATEWAY_IDS_REGEX}" '.vpn_gateways[] | select(.id|test($re)) | .status'
 
 count=0
 while [[ $count -lt 20 ]]; do
