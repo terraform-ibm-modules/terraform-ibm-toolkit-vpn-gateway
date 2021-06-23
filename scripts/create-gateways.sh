@@ -29,7 +29,7 @@ if [[ -z "${IAM_TOKEN}" ]]; then
   exit 1
 fi
 
-API_ENDPOINT="https://${REGION}.iaas.cloud.ibm.com/v1"
+API_ENDPOINT="https://${REGION}.iaas.cloud.ibm.com"
 API_VERSION="2021-06-18"
 
 IFS=','
@@ -39,7 +39,7 @@ for id in $subnet_ids; do
   name="${BASE_NAME}-${count}"
   echo "Provisioning $name VPN instance for subnet: $id"
 
-  create_result=$(curl -s -H "Authorization: Bearer ${IAM_TOKEN}" -X POST "${API_ENDPOINT}/vpn_gateways?version=${API_VERSION}&generation=2" -d "{\"name\":\"${name}\",\"mode\":\"policy\",\"subnet\":{\"id\": \"$id\"},\"resource_group\":{\"id\":\"${RESOURCE_GROUP}\"}}")
+  create_result=$(curl -s -H "Authorization: Bearer ${IAM_TOKEN}" -X POST "${API_ENDPOINT}/v1/vpn_gateways?version=${API_VERSION}&generation=2" -d "{\"name\":\"${name}\",\"mode\":\"policy\",\"subnet\":{\"id\": \"$id\"},\"resource_group\":{\"id\":\"${RESOURCE_GROUP}\"}}")
 
   vpn_gateway_id=$(echo "$create_result" | ${JQ} -r '.id // empty')
 
@@ -52,6 +52,8 @@ for id in $subnet_ids; do
 done
 
 GATEWAY_IDS_REGEX=$(cat "${GATEWAY_IDS_FILE}" | paste -sd "|" -)
+
+sleep 30
 
 echo "Waiting for VPN Gateways to be created: ${GATEWAY_IDS_REGEX}"
 
