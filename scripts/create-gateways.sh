@@ -41,12 +41,12 @@ for id in $subnet_ids; do
 
   create_result=$(curl -s -H "Authorization: Bearer ${IAM_TOKEN}" -X POST "${API_ENDPOINT}/vpn_gateways?version=${API_VERSION}&generation=2" -d "{\"name\":\"${name}\",\"mode\":\"policy\",\"subnet\":{\"id\": \"$id\"},\"resource_group\":{\"id\":\"${RESOURCE_GROUP}\"}}")
 
-  vpn_gateway_id=$(cat "$create_result" | ${JQ} -r '.id // empty')
-
-  echo "$vpn_gateway_id" >> "${GATEWAY_IDS_FILE}"
+  vpn_gateway_id=$(echo "$create_result" | ${JQ} -r '.id // empty')
 
   echo "Result of provisioning $name: $vpn_gateway_id"
   echo "$create_result"
+
+  echo "$vpn_gateway_id" >> "${GATEWAY_IDS_FILE}"
 
   count=$((count + 1))
 done
@@ -57,7 +57,7 @@ echo "Waiting for VPN Gateways to be created"
 
 count=0
 while [[ $count -lt 20 ]]; do
-  statuses=$(curl -s -X GET "${API_ENDPOINT}/v1/vpn_gateways/${vpn_gateway_id}?version=${API_VERSION}&generation=2" -H "Authorization: ${IAM_TOKEN}" | ${JQ} -r --args re "${GATEWAY_IDS_REGEX}" '.vpn_gateways[] | select(.id|test($re)) | .status')
+  statuses=$(curl -s -X GET "${API_ENDPOINT}/v1/vpn_gateways/${vpn_gateway_id}?version=${API_VERSION}&generation=2" -H "Authorization: ${IAM_TOKEN}" | ${JQ} -r --arg re "${GATEWAY_IDS_REGEX}" '.vpn_gateways[] | select(.id|test($re)) | .status')
 
   echo "Statuses: $statuses"
   if [[ $(echo "$statuses" | grep -c "pending") -eq 0 ]]; then
