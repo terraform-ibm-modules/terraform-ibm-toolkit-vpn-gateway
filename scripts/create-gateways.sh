@@ -57,7 +57,7 @@ echo "Waiting for VPN Gateways to be created"
 
 count=0
 while [[ $count -lt 20 ]]; do
-  statuses=$(curl -s -X GET "${API_ENDPOINT}/v1/vpn_gateways/${vpn_gateway_id}?version=${API_VERSION}&generation=2" -H "Authorization: ${IAM_TOKEN}" | ${JQ} -r --arg re "${GATEWAY_IDS_REGEX}" '.vpn_gateways[] | select(.id|test($re)) | .status')
+  statuses=$(curl -s -X GET "${API_ENDPOINT}/v1/vpn_gateways/${vpn_gateway_id}?version=${API_VERSION}&generation=2" -H "Authorization: Bearer ${IAM_TOKEN}" | ${JQ} -r --arg re "${GATEWAY_IDS_REGEX}" '.vpn_gateways[] | select(.id|test($re)) | .status')
 
   echo "Statuses: $statuses"
   if [[ $(echo "$statuses" | grep -c "pending") -eq 0 ]]; then

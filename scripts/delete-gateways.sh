@@ -35,7 +35,7 @@ for id in $subnet_ids; do
   echo "${VPN_GATEWAYS}" | ${JQ} -r --arg ID "${id}" '.vpn_gateways[] | select(.subnet.id == $ID) | .id' | \
     while read vpn_gateway_id;
   do
-    curl -s -X DELETE "${API_ENDPOINT}/v1/vpn_gateways/${vpn_gateway_id}?version=${API_VERSION}&generation=2" -H "Authorization: ${IAM_TOKEN}"
+    curl -s -X DELETE "${API_ENDPOINT}/v1/vpn_gateways/${vpn_gateway_id}?version=${API_VERSION}&generation=2" -H "Authorization: Bearer ${IAM_TOKEN}"
 
     echo "$vpn_gateway_id" >> "${GATEWAY_IDS_FILE}"
   done
