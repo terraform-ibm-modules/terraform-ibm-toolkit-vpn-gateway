@@ -33,9 +33,7 @@ API_VERSION="2021-06-18"
 IFS=','
 subnet_ids=$SUBNET_IDS
 
-VPN_GATEWAYS=$(curl -X GET "${API_ENDPOINT}/v1/vpn_gateways?version=${API_VERSION}&generation=2&resource_group.id=${RESOURCE_GROUP}" -H "Authorization: Bearer ${IAM_TOKEN}")
-
-echo "VPN Gateways: ${VPN_GATEWAYS}"
+VPN_GATEWAYS=$(curl -s -X GET "${API_ENDPOINT}/v1/vpn_gateways?version=${API_VERSION}&generation=2&resource_group.id=${RESOURCE_GROUP}" -H "Authorization: Bearer ${IAM_TOKEN}")
 
 IFS=','
 subnet_ids=$SUBNET_IDS
@@ -49,5 +47,5 @@ for id in $subnet_ids; do
   done
 done
 
-echo "Listing gateways"
+echo "Matching gateways"
 cat "${OUTPUT_FILE}"

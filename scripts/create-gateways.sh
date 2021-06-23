@@ -37,14 +37,13 @@ subnet_ids=$SUBNET_IDS
 count=1
 for id in $subnet_ids; do
   name="${BASE_NAME}-${count}"
-  echo "Provisioning $name VPN instance for subnet: $id"
+  echo "Creating $name VPN instance for subnet: $id"
 
   create_result=$(curl -s -H "Authorization: Bearer ${IAM_TOKEN}" -X POST "${API_ENDPOINT}/v1/vpn_gateways?version=${API_VERSION}&generation=2" -d "{\"name\":\"${name}\",\"mode\":\"policy\",\"subnet\":{\"id\": \"$id\"},\"resource_group\":{\"id\":\"${RESOURCE_GROUP}\"}}")
 
   vpn_gateway_id=$(echo "$create_result" | ${JQ} -r '.id // empty')
 
-  echo "Result of provisioning $name: $vpn_gateway_id"
-  echo "$create_result"
+  echo "Provisioning $name: $vpn_gateway_id"
 
   echo "$vpn_gateway_id" >> "${GATEWAY_IDS_FILE}"
 
