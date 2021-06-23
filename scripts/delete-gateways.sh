@@ -29,5 +29,23 @@ for id in $subnet_ids; do
     while read vpn_gateway_id;
   do
     curl -X DELETE "${API_ENDPOINT}/v1/vpn_gateways/${vpn_gateway_id}?version=${API_VERSION}&generation=2" -H "Authorization: ${IAM_TOKEN}"
+
+    count=0
+    while [[ $count -lt 20 ]]; do
+      RESULT=$(curl -X GET "${API_ENDPOINT}/v1/vpn_gateways?version=${API_VERSION}&generation=2&resource_group.id=${RESOURCE_GROUP}" -H "Authorization: Bearer ${IAM_TOKEN}" | ${JQ} -r '.vpn_gateways[] | .id' | grep "$vpn_gateway_id")
+
+      if [[ -z "$RESULT" ]]; then
+        echo "VPN Gateway has been deleted: $vpn_gateway_id"
+        break
+      fi
+
+      count=$((count + 1))
+      echo "Waiting for VPN Gateway to be deleted: $vpn_gateway_id"
+      sleep 30
+    done
+
+    if [[ $count -eq 20 ]]; then
+      echo "Timed out waiting for VPN Gateway to be deleted"
+    fi
   done
 done
