@@ -4,8 +4,13 @@
 #####################################################
 
 output "ids" {
-  value = var.provision ? ibm_is_vpn_gateway.gateway[*].id : []
+  value = var.provision ? local.output[*].id : []
   description = "The ids of the gateways that were created"
+}
+
+output "crns" {
+  value = var.provision ? local.output[*].crn : []
+  description = "The crns of the gateways that were created"
 }
 
 output "count" {
