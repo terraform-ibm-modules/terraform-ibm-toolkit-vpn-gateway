@@ -57,7 +57,7 @@ sleep 30
 echo "Waiting for VPN Gateways to be created: ${GATEWAY_IDS_REGEX}"
 
 count=0
-while [[ $count -lt 20 ]]; do
+while [[ $count -lt 40 ]]; do
   statuses=$(curl -s -X GET "${API_ENDPOINT}/v1/vpn_gateways?version=${API_VERSION}&generation=2&resource_group.id=${RESOURCE_GROUP}" -H "Authorization: Bearer ${IAM_TOKEN}" | ${JQ} -r --arg re "${GATEWAY_IDS_REGEX}" '.vpn_gateways[] | select(.id|test($re)) | .status')
 
   echo "Statuses: $statuses"
