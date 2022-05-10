@@ -11,33 +11,50 @@ versions:
   - platforms: []
     providers:
       - name: ibm
-        source: "ibm-cloud/ibm"
+        source: ibm-cloud/ibm
     dependencies:
       - id: resource_group
         refs:
           - source: github.com/cloud-native-toolkit/terraform-ibm-resource-group
-            version: ">= 2.1.0"
+            version: '>= 2.1.0'
       - id: subnets
         refs:
           - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
-            version: ">= 1.8.0"
+            version: '>= 1.8.0'
     variables:
       - name: resource_group_id
+        type: string
+        description: >-
+          The id of the IBM Cloud resource group where the VPC has been
+          provisioned.
         moduleRef:
           id: resource_group
           output: id
+      - name: region
         type: string
-        description: The id of the IBM Cloud resource group where the VPC has been provisioned.
+        description: The IBM Cloud region where the cluster will be/has been installed.
+        scope: global
+      - name: ibmcloud_api_key
+        type: string
+        description: The IBM Cloud api token
+        scope: global
       - name: vpc_name
+        type: string
+        description: The name of the vpc instance
         moduleRef:
           id: subnets
           output: vpc_name
+      - name: label
         type: string
-        description: The name of the vpc instance
-      - name: vpc_subnets
+        description: The label for the server instance
+        default: vpn
+      - name: vpc_subnet_count
+        type: number
+        description: Number of vpc subnets
         moduleRef:
           id: subnets
-          output: subnets
+          output: count
+      - name: vpc_subnets
         type: |-
           list(object({
               label = string
@@ -45,49 +62,30 @@ versions:
               zone  = string
             }))
         description: List of subnets with labels
-      - name: vpc_subnet_count
         moduleRef:
           id: subnets
-          output: count
-        type: number
-        description: Number of vpc subnets
-      - name: region
-        scope: global
-        type: string
-        description: The IBM Cloud region where the cluster will be/has been installed.
-      - name: ibmcloud_api_key
-        scope: global
-        type: string
-        description: The IBM Cloud api token
-      - name: label
-        type: string
-        description: The label for the server instance
-        default: vpn
-        optional: true
+          output: subnets
       - name: mode
         type: string
-        description: The optional mode of operation for the VPN gateway. Valid values are route or policy
-        default: "null"
-        optional: true
+        description: >-
+          The optional mode of operation for the VPN gateway. Valid values are
+          route or policy
+        default: 'null'
       - name: tags
         type: list(string)
         description: List of tags for the resource
         default: []
-        optional: true
       - name: provision
         type: bool
-        description: Flag indicating that the resource should be provisioned. If false the resource will be looked up.
+        description: >-
+          Flag indicating that the resource should be provisioned. If false the
+          resource will be looked up.
         default: true
-        optional: true
-    version: v1.1.2
+    version: v1.1.3
     outputs:
       - name: ids
-        description: output "ids" {   value = var.provision ? local.
-      - name: 'output[*].id : []   description = "The ids of the gateways that were created" }'
         description: The ids of the gateways that were created
       - name: crns
-        description: output "crns" {   value = var.provision ? local.
-      - name: 'output[*].crn : []   description = "The crns of the gateways that were created" }'
         description: The crns of the gateways that were created
       - name: count
         description: The number of gateways that were created
@@ -96,23 +94,25 @@ versions:
   - platforms: []
     providers:
       - name: ibm
-        source: "ibm-cloud/ibm"
+        source: ibm-cloud/ibm
     dependencies:
       - id: resource_group
         refs:
           - source: github.com/cloud-native-toolkit/terraform-ibm-resource-group
-            version: ">= 2.1.0"
+            version: '>= 2.1.0'
       - id: subnets
         refs:
           - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
-            version: ">= 1.8.0"
+            version: '>= 1.8.0'
     variables:
       - name: resource_group_id
         moduleRef:
           id: resource_group
           output: id
         type: string
-        description: The id of the IBM Cloud resource group where the VPC has been provisioned.
+        description: >-
+          The id of the IBM Cloud resource group where the VPC has been
+          provisioned.
       - name: vpc_name
         moduleRef:
           id: subnets
@@ -151,8 +151,10 @@ versions:
         optional: true
       - name: mode
         type: string
-        description: The optional mode of operation for the VPN gateway. Valid values are route or policy
-        default: "null"
+        description: >-
+          The optional mode of operation for the VPN gateway. Valid values are
+          route or policy
+        default: 'null'
         optional: true
       - name: tags
         type: list(string)
@@ -161,18 +163,119 @@ versions:
         optional: true
       - name: provision
         type: bool
-        description: Flag indicating that the resource should be provisioned. If false the resource will be looked up.
+        description: >-
+          Flag indicating that the resource should be provisioned. If false the
+          resource will be looked up.
+        default: true
+        optional: true
+    version: v1.1.2
+    outputs:
+      - name: ids
+        description: output "ids" {   value = var.provision ? local.
+      - name: >-
+          output[*].id : []   description = "The ids of the gateways that were
+          created" }
+        description: The ids of the gateways that were created
+      - name: crns
+        description: output "crns" {   value = var.provision ? local.
+      - name: >-
+          output[*].crn : []   description = "The crns of the gateways that were
+          created" }
+        description: The crns of the gateways that were created
+      - name: count
+        description: The number of gateways that were created
+      - name: provision
+        description: The flag indicating that the gateway was provisioned
+  - platforms: []
+    providers:
+      - name: ibm
+        source: ibm-cloud/ibm
+    dependencies:
+      - id: resource_group
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-resource-group
+            version: '>= 2.1.0'
+      - id: subnets
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
+            version: '>= 1.8.0'
+    variables:
+      - name: resource_group_id
+        moduleRef:
+          id: resource_group
+          output: id
+        type: string
+        description: >-
+          The id of the IBM Cloud resource group where the VPC has been
+          provisioned.
+      - name: vpc_name
+        moduleRef:
+          id: subnets
+          output: vpc_name
+        type: string
+        description: The name of the vpc instance
+      - name: vpc_subnets
+        moduleRef:
+          id: subnets
+          output: subnets
+        type: |-
+          list(object({
+              label = string
+              id    = string
+              zone  = string
+            }))
+        description: List of subnets with labels
+      - name: vpc_subnet_count
+        moduleRef:
+          id: subnets
+          output: count
+        type: number
+        description: Number of vpc subnets
+      - name: region
+        scope: global
+        type: string
+        description: The IBM Cloud region where the cluster will be/has been installed.
+      - name: ibmcloud_api_key
+        scope: global
+        type: string
+        description: The IBM Cloud api token
+      - name: label
+        type: string
+        description: The label for the server instance
+        default: vpn
+        optional: true
+      - name: mode
+        type: string
+        description: >-
+          The optional mode of operation for the VPN gateway. Valid values are
+          route or policy
+        default: 'null'
+        optional: true
+      - name: tags
+        type: list(string)
+        description: List of tags for the resource
+        default: []
+        optional: true
+      - name: provision
+        type: bool
+        description: >-
+          Flag indicating that the resource should be provisioned. If false the
+          resource will be looked up.
         default: true
         optional: true
     version: v1.1.1
     outputs:
       - name: ids
         description: output "ids" {   value = var.provision ? local.
-      - name: 'output[*].id : []   description = "The ids of the gateways that were created" }'
+      - name: >-
+          output[*].id : []   description = "The ids of the gateways that were
+          created" }
         description: The ids of the gateways that were created
       - name: crns
         description: output "crns" {   value = var.provision ? local.
-      - name: 'output[*].crn : []   description = "The crns of the gateways that were created" }'
+      - name: >-
+          output[*].crn : []   description = "The crns of the gateways that were
+          created" }
         description: The crns of the gateways that were created
       - name: count
         description: The number of gateways that were created
@@ -183,18 +286,20 @@ versions:
       - id: resource_group
         refs:
           - source: github.com/cloud-native-toolkit/terraform-ibm-resource-group
-            version: ">= 2.1.0"
+            version: '>= 2.1.0'
       - id: subnets
         refs:
           - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
-            version: ">= 1.8.0"
+            version: '>= 1.8.0'
     variables:
       - name: resource_group_id
         moduleRef:
           id: resource_group
           output: id
         type: string
-        description: The id of the IBM Cloud resource group where the VPC has been provisioned.
+        description: >-
+          The id of the IBM Cloud resource group where the VPC has been
+          provisioned.
       - name: vpc_name
         moduleRef:
           id: subnets
@@ -233,8 +338,10 @@ versions:
         optional: true
       - name: mode
         type: string
-        description: The optional mode of operation for the VPN gateway. Valid values are route or policy
-        default: "null"
+        description: >-
+          The optional mode of operation for the VPN gateway. Valid values are
+          route or policy
+        default: 'null'
         optional: true
       - name: tags
         type: list(string)
@@ -243,18 +350,24 @@ versions:
         optional: true
       - name: provision
         type: bool
-        description: Flag indicating that the resource should be provisioned. If false the resource will be looked up.
+        description: >-
+          Flag indicating that the resource should be provisioned. If false the
+          resource will be looked up.
         default: true
         optional: true
     version: v1.1.0
     outputs:
       - name: ids
         description: output "ids" {   value = var.provision ? local.
-      - name: 'output[*].id : []   description = "The ids of the gateways that were created" }'
+      - name: >-
+          output[*].id : []   description = "The ids of the gateways that were
+          created" }
         description: The ids of the gateways that were created
       - name: crns
         description: output "crns" {   value = var.provision ? local.
-      - name: 'output[*].crn : []   description = "The crns of the gateways that were created" }'
+      - name: >-
+          output[*].crn : []   description = "The crns of the gateways that were
+          created" }
         description: The crns of the gateways that were created
       - name: count
         description: The number of gateways that were created
@@ -265,18 +378,20 @@ versions:
       - id: resource_group
         refs:
           - source: github.com/cloud-native-toolkit/terraform-ibm-resource-group
-            version: ">= 2.1.0"
+            version: '>= 2.1.0'
       - id: subnets
         refs:
           - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
-            version: ">= 1.8.0"
+            version: '>= 1.8.0'
     variables:
       - name: resource_group_id
         moduleRef:
           id: resource_group
           output: id
         type: string
-        description: The id of the IBM Cloud resource group where the VPC has been provisioned.
+        description: >-
+          The id of the IBM Cloud resource group where the VPC has been
+          provisioned.
       - name: vpc_name
         moduleRef:
           id: subnets
@@ -315,8 +430,10 @@ versions:
         optional: true
       - name: mode
         type: string
-        description: The optional mode of operation for the VPN gateway. Valid values are route or policy
-        default: "null"
+        description: >-
+          The optional mode of operation for the VPN gateway. Valid values are
+          route or policy
+        default: 'null'
         optional: true
       - name: tags
         type: list(string)
@@ -325,7 +442,9 @@ versions:
         optional: true
       - name: provision
         type: bool
-        description: Flag indicating that the resource should be provisioned. If false the resource will be looked up.
+        description: >-
+          Flag indicating that the resource should be provisioned. If false the
+          resource will be looked up.
         default: true
         optional: true
     version: v1.0.1
@@ -341,22 +460,24 @@ versions:
       - id: resource_group
         refs:
           - source: github.com/cloud-native-toolkit/terraform-ibm-resource-group
-            version: ">= 2.1.0"
+            version: '>= 2.1.0'
       - id: vpc
         refs:
           - source: github.com/cloud-native-toolkit/terraform-ibm-vpc
-            version: ">= 1.11.3"
+            version: '>= 1.11.3'
       - id: subnets
         refs:
           - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
-            version: ">= 1.0.0"
+            version: '>= 1.0.0'
     variables:
       - name: resource_group_id
         moduleRef:
           id: resource_group
           output: id
         type: string
-        description: The id of the IBM Cloud resource group where the VPC has been provisioned.
+        description: >-
+          The id of the IBM Cloud resource group where the VPC has been
+          provisioned.
       - name: vpc_name
         moduleRef:
           id: vpc
@@ -393,8 +514,10 @@ versions:
         optional: true
       - name: mode
         type: string
-        description: The optional mode of operation for the VPN gateway. Valid values are route or policy
-        default: "null"
+        description: >-
+          The optional mode of operation for the VPN gateway. Valid values are
+          route or policy
+        default: 'null'
         optional: true
       - name: tags
         type: list(string)
@@ -403,7 +526,9 @@ versions:
         optional: true
       - name: provision
         type: bool
-        description: Flag indicating that the resource should be provisioned. If false the resource will be looked up.
+        description: >-
+          Flag indicating that the resource should be provisioned. If false the
+          resource will be looked up.
         default: true
         optional: true
     version: v1.0.0
@@ -419,19 +544,5 @@ versions:
       - ocp3
       - ocp4
     dependencies: []
-    #    - id: cluster
-    #      refs:
-    #        - source: github.com/ibm-garage-cloud/terraform-ibm-container-platform
-    #          version: ">= 1.7.0"
-    #        - source: github.com/ibm-garage-cloud/terraform-k8s-ocp-cluster
-    #          version: ">= 2.0.0"
-    #    - id: namespace
-    #      refs:
-    #        - source: github.com/ibm-garage-cloud/terraform-k8s-namespace
-    #          version: ">= 2.1.0"
-    #    - id: dashboard
-    #      refs:
-    #        - source: github.com/ibm-garage-cloud/terraform-k8s-dashboard
-    #          version: ">= 1.6.0"
     variables: []
     version: v0.0.0
