@@ -4,10 +4,17 @@
 #####################################################
 
 locals {
+  tmp_dir = "${path.cwd}/.tmp/vpn-gateway"
   name = replace("${var.vpc_name}-${var.label}", "/[^a-zA-Z0-9_\\-\\.]/", "")
   subnet_ids  = var.vpc_subnets[*].id
-  output_file = "${path.cwd}/.tmp/vpn-gateways.json"
-  output = jsondecode(data.local_file.gateway_output.content)
+  output = jsondecode(data.external.vpn_gateways.result.output)
+}
+
+module setup_clis {
+  source = "cloud-native-toolkit/clis/util"
+  version = "1.10.0"
+
+  clis = ["jq"]
 }
 
 resource null_resource vpn_gateways {
@@ -18,6 +25,8 @@ resource null_resource vpn_gateways {
     resource_group = var.resource_group_id
     subnet_ids = join(",", local.subnet_ids)
     ibmcloud_api_key = var.ibmcloud_api_key
+    bin_dir = module.setup_clis.bin_dir
+    tmp_dir = local.tmp_dir
   }
 
   provisioner "local-exec" {
@@ -25,6 +34,8 @@ resource null_resource vpn_gateways {
 
     environment = {
       IBMCLOUD_API_KEY = self.triggers.ibmcloud_api_key
+      BIN_DIR = self.triggers.bin_dir
+      TMP_DIR = self.triggers.tmp_dir
     }
   }
 
@@ -35,34 +46,22 @@ resource null_resource vpn_gateways {
 
     environment = {
       IBMCLOUD_API_KEY = self.triggers.ibmcloud_api_key
+      BIN_DIR = self.triggers.bin_dir
+      TMP_DIR = self.triggers.tmp_dir
     }
   }
 }
 
-resource null_resource list_vpn_gateways {
-  depends_on = [null_resource.vpn_gateways]
+data external vpn_gateways {
+  program = ["bash", "${path.module}/scripts/list-gateways.sh"]
 
-  triggers = {
-    always_run = timestamp()
+  query = {
+    bin_dir = module.setup_clis.bin_dir
     region = var.region
     resource_group = var.resource_group_id
-    subnet_ids = join(",", local.subnet_ids)
+    subnet_ids = jsonencode(local.subnet_ids)
     ibmcloud_api_key = var.ibmcloud_api_key
   }
-
-  provisioner "local-exec" {
-    command = "${path.module}/scripts/list-gateways.sh '${self.triggers.region}' '${self.triggers.resource_group}' '${self.triggers.subnet_ids}' '${local.output_file}'"
-
-    environment = {
-      IBMCLOUD_API_KEY = self.triggers.ibmcloud_api_key
-    }
-  }
-}
-
-data local_file gateway_output {
-  depends_on = [null_resource.list_vpn_gateways]
-
-  filename = local.output_file
 }
 
 //resource ibm_is_vpn_gateway gateway {

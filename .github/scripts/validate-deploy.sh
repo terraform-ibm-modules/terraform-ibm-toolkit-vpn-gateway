@@ -12,8 +12,11 @@ RESOURCE_GROUP_NAME=$(cat terraform.tfvars | grep resource_group_name | sed "s/r
 echo "PREFIX_NAME: ${PREFIX_NAME}"
 echo "REGION: ${REGION}"
 echo "RESOURCE_GROUP_NAME: ${RESOURCE_GROUP_NAME}"
-echo "IBMCLOUD_API_KEY: ${IBMCLOUD_API_KEY}"
 
-VPC_NAME="${PREFIX_NAME}-vpc"
+BIN_DIR=$(cat .bin_dir)
+
+export PATH="${BIN_DIR}:${PATH}"
+
+## TODO - implement checks
 
 exit 0
