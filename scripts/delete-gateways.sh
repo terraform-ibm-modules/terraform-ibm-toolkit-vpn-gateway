@@ -46,7 +46,7 @@ GATEWAY_IDS_REGEX=$(cat "${GATEWAY_IDS_FILE}" | paste -sd "|" -)
 echo "Waiting for VPN Gateways to be deleted"
 
 count=0
-while [[ $count -lt 20 ]]; do
+while [[ $count -lt 45 ]]; do
   ids=$(curl -s -X GET "${API_ENDPOINT}/v1/vpn_gateways?version=${API_VERSION}&generation=2&resource_group.id=${RESOURCE_GROUP}" -H "Authorization: Bearer ${IAM_TOKEN}" | jq -r '.vpn_gateways[] | .id' | grep -E "${GATEWAY_IDS_REGEX}" | paste -sd ";" -)
 
   if [[ -z "$ids" ]]; then
@@ -56,9 +56,9 @@ while [[ $count -lt 20 ]]; do
 
   count=$((count + 1))
   echo "Waiting for VPN Gateways to be deleted: $ids"
-  sleep 30
+  sleep 60
 done
 
-if [[ $count -eq 20 ]]; then
+if [[ $count -eq 45 ]]; then
   echo "Timed out waiting for VPN Gateway to be deleted"
 fi
