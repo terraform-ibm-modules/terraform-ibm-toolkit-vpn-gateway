@@ -12,7 +12,6 @@ locals {
 
 module setup_clis {
   source = "cloud-native-toolkit/clis/util"
-  version = "1.10.0"
 
   clis = ["jq"]
 }
