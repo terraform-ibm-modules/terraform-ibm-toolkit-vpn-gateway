@@ -1,4 +1,4 @@
-# VPN Gateway module
+# VPN Gateway module 
 
 Module to provision VPN Gateway instance(s) into the provided list of subnets.
 
